@@ -1,0 +1,8 @@
+{
+  "transitServiceStart": "-P1Y",
+  "transitServiceEnd": "P3Y",
+  "localFileNamePatterns": {
+    "osm": ".*\\.osm(\\.pbf)?",
+    "gtfs": ".*\\.zip"
+  }
+}

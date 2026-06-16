@@ -1,0 +1,63 @@
+﻿version: "3.8"
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_MAPTILER_KEY: ${MAPTILER_API_KEY}
+    ports:
+      - "${FRONTEND_PORT:-7300}:7300"
+    environment:
+      SERVER_IP: ${SERVER_IP:-127.0.0.1}
+    volumes:
+      - ssl_certs:/etc/nginx/ssl
+    depends_on:
+      - backend
+    networks:
+      - quarc-maps
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    environment:
+      ORS_API_KEY: ${ORS_API_KEY}
+      OTP_URL: http://otp:8080
+      OTP_DATA_DIR: /otp-data
+      OSM_CACHE_DIR: /osm-cache
+      MDB_REFRESH_TOKEN: ${MDB_REFRESH_TOKEN:-}
+      TRANSITLAND_API_KEY: ${TRANSITLAND_API_KEY:-}
+      PORT: 3001
+    volumes:
+      - otp-data:/otp-data
+      - osm-cache:/osm-cache
+    networks:
+      - quarc-maps
+    restart: unless-stopped
+
+  otp:
+    build: ./otp
+    volumes:
+      - otp-data:/var/opentripplanner
+    environment:
+      # Build phase: full-country graphs need 8–12 GB heap. Add swap if needed.
+      # Serve phase: each active country uses ~2–3 GB RAM.
+      JAVA_BUILD_OPTS: ${JAVA_BUILD_OPTS:-"-Xmx10g -Xms1g"}
+      JAVA_SERVE_OPTS: ${JAVA_SERVE_OPTS:-"-Xmx3g -Xms256m"}
+      # Comma-separated country codes to load immediately on startup.
+      # Start with your most-used countries. Others load on first routing request.
+      # Example: PRELOAD_REGIONS=DE,TR,FR,NL,GB
+      # Leave empty (default) for fully lazy loading — safe on limited RAM.
+      PRELOAD_REGIONS: ${PRELOAD_REGIONS:-}
+    networks:
+      - quarc-maps
+    restart: unless-stopped
+
+volumes:
+  otp-data:
+  osm-cache:
+  ssl_certs:
+
+networks:
+  quarc-maps:
+    driver: bridge

@@ -1,0 +1,17 @@
+﻿{
+  "name": "Quarc Maps",
+  "short_name": "Quarc Maps",
+  "description": "Open-source maps with global transit coverage",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f0f1a",
+  "theme_color": "#1A73E8",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any"
+    }
+  ]
+}
